@@ -1,0 +1,37 @@
+{
+  "name": "npm-apis",
+  "description": "The client for api of npmjs",
+  "version": "1.0.0",
+  "author": "Tree Xie <vicansocanbico@gmail.com>",
+  "keywords": [
+    "npm",
+    "npmjs",
+    "api"
+  ],
+  "scripts": {
+    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
+    "test": "node ./node_modules/.bin/eslint ./lib/*.js && node ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha ./test/*.js --"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vicanso/npm-api.git"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "moment": "^2.18.1",
+    "superagent": "^3.5.2"
+  },
+  "devDependencies": {
+    "eslint": "^3.12.2",
+    "eslint-config-airbnb": "^13.0.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^2.2.3",
+    "eslint-plugin-react": "^6.8.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.1.0"
+  }
+}
