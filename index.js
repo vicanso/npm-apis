@@ -2,7 +2,7 @@ const request = require('superagent');
 const _ = require('lodash');
 const moment = require('moment');
 
-exports.timeout = 0;
+exports.timeout = 30 * 1000;
 
 function addRegistry(url) {
   return `https://registry.npmjs.org${url}`;
@@ -28,9 +28,26 @@ function getPublishedTime(time) {
  * @return {Array} The name list of module
  */
 exports.getAll = () => {
-  return request.get(addRegistry('/-/all/static/all.json'))
+  const url = addRegistry('/-/all/static/all.json');
+  return request.get(url)
     .timeout(exports.timeout)
-    .then(res => res.body);
+    .then((res) => {
+      const data = res.body;
+      if (_.isEmpty(data)) {
+        throw new Error('Get moudles fail, it\'s empty');
+      }
+      const modules = [];
+      _.forEach(data, (pkg, key) => {
+        if (key === '_updated') {
+          return;
+        }
+        if (!pkg.time || !pkg.time.modified) {
+          return;
+        }
+        modules.push(pkg.name);
+      });
+      return modules;
+    });
 };
 
 /**
@@ -87,7 +104,7 @@ exports.get = (name) => {
  * @return {Array} The downloads list of module
  */
 exports.getDownloads = (name, start, end) => {
-  const url = `/downloads/range/${start}:${end}`
+  const url = `/downloads/range/${start}:${end}/${name}`;
   return request.get(addNpmjsAPI(url))
     .timeout(exports.timeout)
     .then(res => _.get(res, 'body.downloads', []));
@@ -101,16 +118,6 @@ function getDownloadsByDay(name, day) {
     return data[0].downloads;
   });
 }
-
-/**
- * Get the downloads of today
- * @param  {String} name The name of module
- * @return {Integer} The downloads of modules
- */
-exports.getTodayDownloads = (name) => {
-  const today = moment().toISOString().substring(0, 10);
-  return getDownloadsByDay(name, today);
-};
 
 /**
  * Get the downloads of yesterday
@@ -127,7 +134,8 @@ exports.getYesterdayDownloads = (name) => {
  * @return {Array} The module list
  */
 exports.getTodayUpdates = () => {
-  return request.get(addRegistry('/-/all/static/today.json'))
+  const url = addRegistry('/-/all/static/today.json');
+  return request.get(url)
     .timeout(exports.timeout)
     .then(res => _.map(res.body, item => item.name));
 };
@@ -137,7 +145,8 @@ exports.getTodayUpdates = () => {
  * @return {Array} THe depended count informations list
  */
 exports.getDependeds = () => {
-  return request.get(addRegistry('/-/_view/dependedUpon?group_level=1'))
+  const url = addRegistry('/-/_view/dependedUpon?group_level=1');
+  return request.get(url)
     .timeout(exports.timeout)
     .then((res) => {
       const arr = [];
@@ -160,7 +169,8 @@ exports.getDependeds = () => {
  * @return {Object} The score informations of module
  */
 exports.getScore = (name) => {
-  return request.get(`https://api.npms.io/v2/package/${name}`)
+  const url = `https://api.npms.io/v2/package/${name}`;
+  return request.get(url)
     .timeout(exports.timeout)
     .then((res) => {
       const data = res.body.score;
