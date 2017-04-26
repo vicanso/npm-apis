@@ -75,7 +75,7 @@ exports.get = (name) => {
   return request.get(addRegistry(url))
     .timeout(exports.timeout)
     .then((res) => {
-      if (_.isEmpty(res.body)) {
+      if (_.isEmpty(res.body) || !res.body['dist-tags']) {
         throw new Error('Can\'t get the module\'s informations');
       }
       const time = res.body.time;
