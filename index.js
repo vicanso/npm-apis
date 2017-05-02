@@ -33,7 +33,6 @@ function getPublishedTime(time) {
 exports.getAll = () => {
   const url = addRegistry('/-/all/static/all.json');
   return request.get(url)
-    .timeout(exports.timeout)
     .then((res) => {
       const data = res.body;
       if (_.isEmpty(data)) {
@@ -76,7 +75,9 @@ exports.get = (name) => {
     .timeout(exports.timeout)
     .then((res) => {
       if (_.isEmpty(res.body) || !res.body['dist-tags']) {
-        throw new Error('Can\'t get the module\'s informations');
+        const err =  new Error('Can\'t get the module\'s informations');
+        err.code = 'INVALID';
+        throw err;
       }
       const time = res.body.time;
       delete time.modified;
@@ -139,7 +140,6 @@ exports.getYesterdayDownloads = (name) => {
 exports.getTodayUpdates = () => {
   const url = addRegistry('/-/all/static/today.json');
   return request.get(url)
-    .timeout(exports.timeout)
     .then(res => _.map(res.body, item => item.name));
 };
 
@@ -150,7 +150,6 @@ exports.getTodayUpdates = () => {
 exports.getDependeds = () => {
   const url = addRegistry('/-/_view/dependedUpon?group_level=1');
   return request.get(url)
-    .timeout(exports.timeout)
     .then((res) => {
       const arr = [];
       _.forEach(res.body.rows, (item) => {
