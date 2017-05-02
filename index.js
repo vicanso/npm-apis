@@ -75,7 +75,7 @@ exports.get = (name) => {
     .timeout(exports.timeout)
     .then((res) => {
       if (_.isEmpty(res.body) || !res.body['dist-tags']) {
-        const err =  new Error('Can\'t get the module\'s informations');
+        const err = new Error('Can\'t get the module\'s informations');
         err.code = 'INVALID';
         throw err;
       }
