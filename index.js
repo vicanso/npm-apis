@@ -1,8 +1,15 @@
 const request = require('superagent');
 const _ = require('lodash');
 const moment = require('moment');
+const stream = require('stream');
 
 exports.timeout = 30 * 1000;
+
+class WriteStream extends stream.Writable {
+  write(buf) {
+    this.emit('data', buf);
+  }
+}
 
 function addRegistry(url) {
   return `https://registry.npmjs.org${url}`;
@@ -26,31 +33,85 @@ function getPublishedTime(time) {
   return result;
 }
 
+function getModulesFromStream(writeStream) {
+  const divideJSON = (buf) => {
+    let foundIndex = 0;
+    let endIndex = -1;
+    let usedIndex = 0;
+    let startIndex = -1;
+    const max = buf.length;
+    const modules = [];
+    while (foundIndex !== -1 && foundIndex < max) {
+      if (startIndex === -1) {
+        startIndex = buf.indexOf('{', foundIndex);
+        if (startIndex === -1) {
+          break;
+        }
+        foundIndex = startIndex + 1;
+        /* eslint no-continue:0 */
+        continue;
+      }
+      endIndex = buf.indexOf('}', foundIndex);
+      if (endIndex === -1) {
+        foundIndex = max;
+        /* eslint no-continue:0 */
+        continue;
+      }
+      const str = buf.slice(startIndex, endIndex + 1).toString();
+      try {
+        const json = JSON.parse(str);
+        startIndex = -1;
+        usedIndex = endIndex + 1;
+        if (json.time && json.time.modified) {
+          modules.push(json.name);
+        }
+      } catch (error) {
+        /* eslint no-empty:0 */
+      }
+      foundIndex = endIndex + 1;
+    }
+    return {
+      buf: buf.slice(usedIndex),
+      modules,
+    };
+  };
+  let first = true;
+  let restBuffer;
+  const npmModules = [];
+  return new Promise((resolve, reject) => {
+    writeStream.on('data', (buf) => {
+      let tmpBuf = buf;
+      if (first) {
+        first = false;
+        tmpBuf = buf.slice(1);
+      }
+      if (restBuffer && restBuffer.length) {
+        tmpBuf = Buffer.concat([restBuffer, tmpBuf]);
+      }
+      const result = divideJSON(tmpBuf);
+      restBuffer = result.buf;
+      npmModules.push(...result.modules);
+    })
+    .on('finish', () => {
+      resolve(npmModules.sort());
+    })
+    .on('error', reject);
+  });
+}
+
+
 /**
  * Get all modules
  * @return {Array} The name list of module
  */
 exports.getAll = () => {
   const url = addRegistry('/-/all/static/all.json');
-  return request.get(url)
-    .then((res) => {
-      const data = res.body;
-      if (_.isEmpty(data)) {
-        throw new Error('Get moudles fail, it\'s empty');
-      }
-      const modules = [];
-      _.forEach(data, (pkg, key) => {
-        if (key === '_updated') {
-          return;
-        }
-        if (!pkg.time || !pkg.time.modified) {
-          return;
-        }
-        modules.push(pkg.name);
-      });
-      return modules;
-    });
+  const req = request.get(url);
+  const writeStream = new WriteStream();
+  req.pipe(writeStream);
+  return getModulesFromStream(writeStream);
 };
+
 
 /**
  * Get the informations of user
