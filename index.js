@@ -102,11 +102,11 @@ function getModulesFromStream(writeStream) {
 
 /**
  * Get all modules
+ * @param {url} The all.json url [optional]
  * @return {Array} The name list of module
  */
-exports.getAll = () => {
-  const url = addRegistry('/-/all/static/all.json');
-  const req = request.get(url);
+exports.getAll = (url) => {
+  const req = request.get(url || addRegistry('/-/all/static/all.json'));
   const writeStream = new WriteStream();
   req.pipe(writeStream);
   return getModulesFromStream(writeStream);

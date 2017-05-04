@@ -1,7 +1,7 @@
 {
   "name": "npm-apis",
   "description": "The client for api of npmjs",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": "Tree Xie <vicansocanbico@gmail.com>",
   "keywords": [
     "npm",
