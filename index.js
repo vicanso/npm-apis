@@ -205,6 +205,17 @@ exports.getTodayUpdates = () => {
 };
 
 /**
+ * Get the update moudles of yesterday
+ * @return {Array} The module list
+ */
+exports.getYesterdayUpdates = () => {
+  const url = addRegistry('/-/all/static/yesterday.json');
+  return request.get(url)
+    .then(res => _.map(res.body, item => item.name));
+};
+
+
+/**
  * Get the depended count list
  * @return {Array} THe depended count informations list
  */
