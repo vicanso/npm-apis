@@ -100,6 +100,17 @@ npmApis.getTodayUpdates().then((data) => {
 });
 ```
 
+### getYesterdayUpdates
+
+Get yesterday update modules
+
+```js
+const npmApis = require('npm-apis');
+npmApis.getYesterdayUpdates().then((data) => {
+  console.info(data);
+});
+```
+
 ### getDependeds
 
 Get the module depended informations

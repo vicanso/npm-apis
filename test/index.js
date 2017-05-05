@@ -1,60 +1,15 @@
-const request = require('superagent');
 const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
 const _ = require('lodash');
 
 const npmApis = require('..');
-const originalEnd = request.Request.prototype.end;
 
 npmApis.timeout = 0;
 
-function getAllJSON(fn) {
-  const file = path.join(__dirname, '../assets/all.json');
-  fs.readFile(file, (err, buf) => {
-    if (err) {
-      fn(err);
-      return;
-    }
-    return fn(null, {
-      body: JSON.parse(buf),
-    });
-  });
-}
-
-function getDepended(fn) {
-  const file = path.join(__dirname, '../assets/depended.json');
-  fs.readFile(file, (err, buf) => {
-    if (err) {
-      fn(err);
-      return;
-    }
-    return fn(null, {
-      body: JSON.parse(buf),
-    });
-  });
-}
-
-if (process.env.MOCK) {
-  request.Request.prototype.end = function(fn) {
-    const url = this.url;
-    switch (url) {
-      case 'https://registry.npmjs.org/-/all/static/all.json':
-        getAllJSON(fn);
-        break;
-      case 'https://registry.npmjs.org/-/_view/dependedUpon?group_level=1':
-        getDepended(fn);
-        break;
-      default:
-        originalEnd.apply(this, [fn]);
-    }
-  };
-}
 
 describe('npm-apis', () => {
   it('getAll', function(done) {
     this.timeout(300 * 1000);
-    npmApis.getAll().then((data) => {
+    npmApis.getAll('http://oidmt881u.bkt.clouddn.com/all.json').then((data) => {
       assert(data.length > 400 * 1000);
       assert(data.indexOf('influxdb-nodejs') !== -1);
       done();
@@ -63,13 +18,13 @@ describe('npm-apis', () => {
 
   it('getDependeds', function(done) {
     this.timeout(300 * 1000);
-    npmApis.getDependeds().then((data) => {
+    npmApis.getDependeds('http://oidmt881u.bkt.clouddn.com/depended.json').then((data) => {
       assert(data.length > 50 * 1000);
       assert(_.find(data, item => item.name === 'lodash'));
       done();
     }).catch(done);
   });
-
+  
   it('getUser', function(done) {
     this.timeout(10 * 1000);
     const name = 'tree.xie';
@@ -123,11 +78,19 @@ describe('npm-apis', () => {
 
   it('getTodayUpdates', function(done) {
     this.timeout(10 * 1000);
-    npmApis.getTodayUpdates().then((data) => {
+    npmApis.getTodayUpdates('http://oidmt881u.bkt.clouddn.com/today.json').then((data) => {
       assert.notEqual(data.length, 0);
       done();
     }).catch(done);
   });
+
+  it('getYesterdayUpdates', function(done) {
+    this.timeout(10 * 1000);
+    npmApis.getYesterdayUpdates('http://oidmt881u.bkt.clouddn.com/yesterday.json').then((data) => {
+      assert.notEqual(data.length, 0);
+      done();
+    }).catch(done);
+  })
 
   it('getScore', function(done) {
     this.timeout(10 * 1000);

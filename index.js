@@ -1,6 +1,5 @@
 const request = require('superagent');
 const _ = require('lodash');
-const moment = require('moment');
 const stream = require('stream');
 
 exports.timeout = 30 * 1000;
@@ -190,7 +189,7 @@ function getDownloadsByDay(name, day) {
  * @return {Integer} The downloads of modules
  */
 exports.getYesterdayDownloads = (name) => {
-  const yesterday = moment().add(-1, 'day').toISOString().substring(0, 10);
+  const yesterday = new Date(Date.now() - (24 * 3600 * 1000)).toISOString().substring(0, 10);
   return getDownloadsByDay(name, yesterday);
 };
 
@@ -198,9 +197,9 @@ exports.getYesterdayDownloads = (name) => {
  * Get the update moudles of today
  * @return {Array} The module list
  */
-exports.getTodayUpdates = () => {
-  const url = addRegistry('/-/all/static/today.json');
-  return request.get(url)
+exports.getTodayUpdates = (url) => {
+  const requestUrl = url || addRegistry('/-/all/static/today.json');
+  return request.get(requestUrl)
     .then(res => _.map(res.body, item => item.name));
 };
 
@@ -208,9 +207,9 @@ exports.getTodayUpdates = () => {
  * Get the update moudles of yesterday
  * @return {Array} The module list
  */
-exports.getYesterdayUpdates = () => {
-  const url = addRegistry('/-/all/static/yesterday.json');
-  return request.get(url)
+exports.getYesterdayUpdates = (url) => {
+  const requestUrl = url || addRegistry('/-/all/static/yesterday.json');
+  return request.get(requestUrl)
     .then(res => _.map(res.body, item => item.name));
 };
 
@@ -219,9 +218,9 @@ exports.getYesterdayUpdates = () => {
  * Get the depended count list
  * @return {Array} THe depended count informations list
  */
-exports.getDependeds = () => {
-  const url = addRegistry('/-/_view/dependedUpon?group_level=1');
-  return request.get(url)
+exports.getDependeds = (url) => {
+  const requestUrl = url || addRegistry('/-/_view/dependedUpon?group_level=1');
+  return request.get(requestUrl)
     .then((res) => {
       const arr = [];
       _.forEach(res.body.rows, (item) => {
