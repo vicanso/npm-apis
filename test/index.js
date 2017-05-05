@@ -8,7 +8,7 @@ npmApis.timeout = 0;
 
 describe('npm-apis', () => {
   it('getAll', function(done) {
-    this.timeout(300 * 1000);
+    this.timeout(1800 * 1000);
     npmApis.getAll('http://oidmt881u.bkt.clouddn.com/all.json').then((data) => {
       assert(data.length > 400 * 1000);
       assert(data.indexOf('influxdb-nodejs') !== -1);
@@ -17,7 +17,7 @@ describe('npm-apis', () => {
   });
 
   it('getDependeds', function(done) {
-    this.timeout(300 * 1000);
+    this.timeout(1800 * 1000);
     npmApis.getDependeds('http://oidmt881u.bkt.clouddn.com/depended.json').then((data) => {
       assert(data.length > 50 * 1000);
       assert(_.find(data, item => item.name === 'lodash'));
@@ -26,7 +26,7 @@ describe('npm-apis', () => {
   });
   
   it('getUser', function(done) {
-    this.timeout(10 * 1000);
+    this.timeout(300 * 1000);
     const name = 'tree.xie';
     npmApis.getUser(name).then((data) => {
       assert.equal(data.name, name);
@@ -36,7 +36,7 @@ describe('npm-apis', () => {
   });
 
   it('get', function(done) {
-    this.timeout(10 * 1000);
+    this.timeout(300 * 1000);
     const pkg = 'influxdb-nodejs';
     npmApis.get(pkg).then((data) => {
       assert.equal(data.name, pkg);
@@ -58,7 +58,7 @@ describe('npm-apis', () => {
   });
 
   it('getDownloads', function(done) {
-    this.timeout(10 * 1000);
+    this.timeout(300 * 1000);
     npmApis.getDownloads('lodash', '2017-01-01', '2017-01-02').then((counts) => {
       assert.equal(counts.length, 2);
       assert(counts[0].day);
@@ -68,7 +68,7 @@ describe('npm-apis', () => {
   });
 
   it('getYesterdayDownloads', function(done) {
-    this.timeout(10 * 1000);
+    this.timeout(300 * 1000);
     npmApis.getYesterdayDownloads('lodash').then((count) => {
       assert(count);
       done();
@@ -77,7 +77,7 @@ describe('npm-apis', () => {
 
 
   it('getTodayUpdates', function(done) {
-    this.timeout(10 * 1000);
+    this.timeout(300 * 1000);
     npmApis.getTodayUpdates('http://oidmt881u.bkt.clouddn.com/today.json').then((data) => {
       assert.notEqual(data.length, 0);
       done();
@@ -85,7 +85,7 @@ describe('npm-apis', () => {
   });
 
   it('getYesterdayUpdates', function(done) {
-    this.timeout(10 * 1000);
+    this.timeout(300 * 1000);
     npmApis.getYesterdayUpdates('http://oidmt881u.bkt.clouddn.com/yesterday.json').then((data) => {
       assert.notEqual(data.length, 0);
       done();
@@ -93,7 +93,7 @@ describe('npm-apis', () => {
   })
 
   it('getScore', function(done) {
-    this.timeout(10 * 1000);
+    this.timeout(300 * 1000);
     npmApis.getScore('express').then((data) => {
       const keys = [
         'final',
