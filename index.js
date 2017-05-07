@@ -22,7 +22,7 @@ function getPublishedTime(time) {
   const result = {};
   _.forEach(time, (date, version) => {
     const major = version.split('.')[0];
-    if (!result[major] || result[major] < date) {
+    if (!result[major] || result[major] > date) {
       result[major] = {
         version,
         time: date,
